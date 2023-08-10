@@ -14,7 +14,11 @@ type interval struct {
 }
 
 func contains(a, b interval) bool {
-	return a.start <= b.start && a.end >= b.end
+	return (a.start <= b.start && a.end >= b.end) || (b.start <= a.start && b.end >= a.end)
+}
+
+func overlaps(a, b interval) bool {
+	return a.start <= b.end && a.end >= b.start
 }
 
 func main() {
@@ -22,39 +26,41 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	partOne(bufio.NewScanner(file))
-	_, err = file.Seek(0, 0)
-	if err != nil {
-		log.Fatalln(bufio.NewScanner(file))
-	}
-}
+	defer file.Close()
 
-func partOne(s *bufio.Scanner) {
 	containsCount := 0
+	overlapsCount := 0
+	s := bufio.NewScanner(file)
 	for s.Scan() {
 		pair := strings.Split(s.Text(), ",")
 		firstInterval := convertToInterval(pair[0])
 		secondInterval := convertToInterval(pair[1])
-		if contains(firstInterval, secondInterval) || contains(secondInterval, firstInterval) {
+		if contains(firstInterval, secondInterval) {
 			containsCount++
 		}
+		if overlaps(firstInterval, secondInterval) {
+			overlapsCount++
+		}
 	}
-	fmt.Println(containsCount, "pairs fully contain one another")
+	fmt.Println("Part one:", containsCount, "pairs fully contain one another")
+	fmt.Println("Part two:", overlapsCount, "pairs overlap")
 }
 
 func convertToInterval(intervalStr string) interval {
 	intervalLimits := strings.Split(intervalStr, "-")
-	res := interval{}
-	for i, limit := range intervalLimits {
-		if num, err := strconv.Atoi(limit); err != nil {
-			log.Fatalf("malformed pair at index %d: %v", i, err)
-		} else {
-			if i == 0 {
-				res.start = num
-			} else if i == 1 {
-				res.end = num
-			}
-		}
+	if len(intervalLimits) != 2 {
+		log.Fatalf("malformed pair: %v\n", intervalStr)
 	}
-	return res
+
+	start, err := strconv.Atoi(intervalLimits[0])
+	if err != nil {
+		log.Fatalf("malformed start value: %v", err)
+	}
+
+	end, err := strconv.Atoi(intervalLimits[1])
+	if err != nil {
+		log.Fatalf("malformed end value: %v", err)
+	}
+
+	return interval{start: start, end: end}
 }
