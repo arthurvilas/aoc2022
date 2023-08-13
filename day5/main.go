@@ -42,33 +42,7 @@ func main() {
 
 	s := bufio.NewScanner(file)
 	stacks := getInitialStacks(s)
-	for s.Scan() {
-		command := strings.Fields(s.Text())
-		if len(command) < 6 {
-			log.Fatalln("malformed command")
-		}
-
-		times, err := strconv.Atoi(command[1])
-		if err != nil {
-			log.Fatalln("command conversion error")
-		}
-		from, err := strconv.Atoi(command[3])
-		if err != nil {
-			log.Fatalln("command conversion error")
-		}
-		to, err := strconv.Atoi(command[5])
-		if err != nil {
-			log.Fatalln("command conversion error")
-		}
-
-		for i := 0; i < times; i++ {
-			popped, err := stacks[from-1].pop()
-			if err != nil {
-				log.Fatalln(err)
-			}
-			stacks[to-1].push(popped)
-		}
-	}
+	processCommands(s, stacks)
 
 	for _, stack := range stacks {
 		fmt.Print(stack.peek())
@@ -103,4 +77,57 @@ func getInitialStacks(s *bufio.Scanner) []stack {
 	}
 
 	return stacks
+}
+
+func processCommands(s *bufio.Scanner, stacks []stack) {
+	for s.Scan() {
+		command := strings.Fields(s.Text())
+		if len(command) < 6 {
+			log.Fatalln("malformed command")
+		}
+
+		times, err := strconv.Atoi(command[1])
+		if err != nil {
+			log.Fatalln("command conversion error")
+		}
+		from, err := strconv.Atoi(command[3])
+		if err != nil {
+			log.Fatalln("command conversion error")
+		}
+		to, err := strconv.Atoi(command[5])
+		if err != nil {
+			log.Fatalln("command conversion error")
+		}
+
+		partTwo(times, from, to, stacks)
+	}
+}
+
+func partOne(times, from, to int, stacks []stack) {
+	for i := 0; i < times; i++ {
+		popped, err := stacks[from-1].pop()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		stacks[to-1].push(popped)
+	}
+}
+
+func partTwo(times, from, to int, stacks []stack) {
+	craneBuffer := stack{}
+	for i := 0; i < times; i++ {
+		popped, err := stacks[from-1].pop()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		craneBuffer.push(popped)
+	}
+
+	for i := 0; i < times; i++ {
+		popped, err := craneBuffer.pop()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		stacks[to-1].push(popped)
+	}
 }
