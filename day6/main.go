@@ -48,10 +48,17 @@ func main() {
 		log.Fatalln(err)
 	}
 	defer file.Close()
+	findMarker(file, 4)
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	findMarker(file, 14)
+}
 
+func findMarker(file *os.File, size int) {
 	q := make(queue, 0, 4)
 	position := 0
-
 	reader := bufio.NewReader(file)
 	for {
 		char, _, err := reader.ReadRune()
@@ -63,13 +70,13 @@ func main() {
 
 		position++
 
-		if q.length() < 4 {
+		if q.length() < size {
 			q.enqueue(char)
 		} else {
 			q.dequeue()
 			q.enqueue(char)
 			if q.uniqueItems() {
-				fmt.Println("First marker after character", position)
+				fmt.Printf("First marker of len %v after character %v\n", size, position)
 				return
 			}
 		}
