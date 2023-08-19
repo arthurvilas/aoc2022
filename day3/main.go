@@ -18,7 +18,7 @@ func main() {
 	partOne(bufio.NewScanner(file))
 	_, err = file.Seek(0, 0)
 	if err != nil {
-		log.Fatalln(bufio.NewScanner(file))
+		log.Fatalln(err)
 	}
 	partTwo(bufio.NewScanner(file))
 }
